@@ -1,18 +1,22 @@
 {
     "name": "hyn/dissonance",
     "description": "",
-    "type": "project",
     "license": "mit",
     "require": {
         "php": ">=7.1.0",
         "team-reflex/discord-php": "^4.0",
         "illuminate/config": "5.3.*",
         "illuminate/container": "5.3.*",
-        "illuminate/support": "5.3.*"
+        "illuminate/support": "5.3.*",
+        "josegonzalez/dotenv": "^2.0",
+        "illuminate/events": "^5.3"
     },
     "autoload": {
+        "files": [
+            "src/Helpers/env.php"
+        ],
         "psr-4": {
-            "Dissonance\\": "app/"
+            "Dissonance\\": "src/"
         }
     }
 }

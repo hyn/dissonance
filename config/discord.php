@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'token' => ''
+    'token' => env('DISCORD_TOKEN', ''),
 ];

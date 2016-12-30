@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+
+namespace Dissonance;
+
+use Dissonance\Foundation\Application;
+
+/** @var Application $app */
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+$app->call(Runner::class . '@run');

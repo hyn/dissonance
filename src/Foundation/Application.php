@@ -2,6 +2,7 @@
 
 namespace Dissonance\Foundation;
 
+use Dissonance\Discord;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\Container as ContainerContract;
@@ -9,6 +10,8 @@ use Illuminate\Contracts\Events\Dispatcher as EventDispatcherContract;
 use Illuminate\Events\Dispatcher;
 use josegonzalez\Dotenv\Filter\LowercaseKeyFilter;
 use josegonzalez\Dotenv\Loader;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Symfony\Component\Finder\Finder;
 
 class Application extends Container implements ContainerContract
@@ -27,6 +30,18 @@ class Application extends Container implements ContainerContract
         $this->loadEnv();
         $this->loadConfiguration();
         $this->loadEvents();
+        $this->loadDiscord();
+    }
+
+    protected function loadDiscord()
+    {
+        $this->singleton(Discord::class, function($app) {
+            return new Discord([
+                'token' => $app->make('config')->get('discord.token'),
+                'loggerLevel' => $app->make('config')->get('app.debug') ? Logger::DEBUG : Logger::INFO,
+                'logging' => true
+            ]);
+        });
     }
 
     /**
@@ -63,6 +78,7 @@ class Application extends Container implements ContainerContract
 
             return new Repository($items);
         });
+        $this->alias(Repository::class, 'config');
     }
 
     protected function setSelf()

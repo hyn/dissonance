@@ -1,5 +1,6 @@
 <?php
 
 return [
-    \Dissonance\Extensions\Welcoming\WelcomesOnline::class,
+    \Dissonance\Extensions\Infrastructure\Ping::class,
+//    \Dissonance\Extensions\Welcoming\WelcomesOnline::class,
 ];

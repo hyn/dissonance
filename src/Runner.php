@@ -59,13 +59,13 @@ class Runner
         // Binds the identity the discord client uses into the container.
         $this->app->singleton(
             Client::class,
-            $discord->client
+            function() use ($discord) { return $discord->client; }
         );
 
         // Binds the logger instance the discord client uses into the container.
         $this->app->singleton(
             LoggerWrapper::class,
-            $discord->logger
+            function() use ($discord) { return $discord->logger; }
         );
 
     }
@@ -91,7 +91,7 @@ class Runner
                         throw new \RuntimeException('Not callable');
                     }
 
-                    $discord->logger->info("Class $class registered on event $event");
+                    $discord->logger->debug("Class $class registered on event $event");
 
                     $discord->on($event, $callable);
                 }

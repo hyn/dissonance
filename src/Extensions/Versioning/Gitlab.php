@@ -5,13 +5,20 @@ namespace Dissonance\Extensions\Versioning;
 use Discord\Parts\Channel\Message;
 use Dissonance\Contracts\Extension;
 use Dissonance\Discord;
+use Dissonance\Traits\MutatesMessages;
 use GuzzleHttp\Client;
 use Illuminate\Config\Repository;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class Gitlab implements Extension
 {
+    use MutatesMessages;
+
     protected $baseUrl = 'https://gitlab.example.com/api/v3';
+
+    protected $regex = '/(?<project>[a-zA-Z0-9_-\/])?(?<issue>\#[0-9]+)/';
 
     /**
      * @var Client
@@ -43,14 +50,41 @@ class Gitlab implements Extension
      */
     public function type(Message $message, Discord $discord)
     {
-        $project = $message->channel->name;
-        if ($namespace = $this->config->get('gitlab.namespace')) {
-            $project = "$namespace/$project";
+        if (! \Discord\mentioned($discord->client, $message)) {
+            return;
         }
 
-        $project = $this->project($project);
+        $slug = $message->channel->name;
 
-        
+        if (!preg_match($this->regex, $this->cleanMessageContent($message), $m)) {
+            return;
+        }
+        if (Arr::get($m, 'project')) {
+            $slug = Arr::get($m, 'project');
+        }
+
+        if ($slug && !Str::contains($slug, '/') && ($namespace = $this->config->get('gitlab.namespace'))) {
+            $slug = "$namespace/$slug";
+        }
+
+        $project = $this->project($slug);
+
+        if (!$project) {
+            $message->reply('Get out :clown:, that project doesn\'t exist.');
+            return;
+        }
+
+        if ($issue = Arr::get($m, 'issue')) {
+            $issue = $this->projectIssue($slug, $issue);
+            $message->reply(sprintf(
+                'Issue #%d (%s) - %s (assigned to %s)',
+                Arr::get($issue, 'id'),
+                Arr::get($issue, 'state'),
+                Arr::get($issue, 'title'),
+                Arr::get($issue, 'assignee.name')
+            ));
+            return;
+        }
     }
 
     /**

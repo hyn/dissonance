@@ -10,7 +10,6 @@ use Illuminate\Contracts\Events\Dispatcher as EventDispatcherContract;
 use Illuminate\Events\Dispatcher;
 use josegonzalez\Dotenv\Filter\LowercaseKeyFilter;
 use josegonzalez\Dotenv\Loader;
-use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Finder\Finder;
 

@@ -1,16 +1,17 @@
 <?php
 
-$autoloaders = [
-    __DIR__.'/../vendor/autoload.php',
-    __DIR__.'/../../../autoload.php'
+$basePaths = [
+    __DIR__ . '/../',
+    __DIR__ . '/../../../../',
 ];
-foreach ($autoloaders as $autoload) {
-    if (file_exists($autoload)) {
-        require_once $autoload;
+
+foreach ($basePaths as $basePath) {
+    if (file_exists($autoloader = $basePath . 'vendor/autoload.php')) {
+        require_once $autoloader;
         break;
     }
 }
 
 use Dissonance\Foundation\Application;
 
-return new Application(__DIR__ . '/../');
+return new Application($basePath);

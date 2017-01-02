@@ -91,16 +91,26 @@ class Gitlab implements Extension
             }
 
             if ($issue) {
-                $message->reply(sprintf(
-                    'Issue #%d (%s) - %s (assigned to %s)',
-                    Arr::get($issue, 'id'),
-                    Arr::get($issue, 'state'),
-                    Arr::get($issue, 'title'),
-                    Arr::get($issue, 'assignee.name')
-                ));
+                $message->reply($this->formatIssueReply($issue));
             }
             return;
         }
+    }
+
+    protected function formatIssueReply($issue): string
+    {
+        $reply = sprintf(
+            'Issue #%d (%s) - %s',
+            Arr::get($issue, 'id'),
+            Arr::get($issue, 'state'),
+            Arr::get($issue, 'title')
+        );
+
+        if (Arr::get($issue, 'assignee') && $name = Arr::get($issue, 'assignee.name')) {
+            $reply .= " (assigned to $name)";
+        }
+
+        return $reply;
     }
 
     /**

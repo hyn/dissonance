@@ -30,8 +30,33 @@ class Application extends Container implements ContainerContract
         $this->loadConfiguration();
         $this->loadEvents();
         $this->loadDiscord();
+
+        $this->loadProviders();
     }
 
+    /**
+     * Loads any service providers.
+     */
+    protected function loadProviders()
+    {
+        $providers = $this->make('config')->get('app.providers', []);
+
+        foreach($providers as $provider) {
+            if (method_exists($provider, 'register')) {
+                $this->call([$provider, 'register']);
+            }
+        }
+
+        foreach($providers as $provider) {
+            if (method_exists($provider, 'boot')) {
+                $this->call([$provider, 'boot']);
+            }
+        }
+    }
+
+    /**
+     * Adds discord to the container.
+     */
     protected function loadDiscord()
     {
         $this->singleton(Discord::class, function($app) {

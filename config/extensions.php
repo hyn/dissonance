@@ -1,8 +1,10 @@
 <?php
 
-return [
-    \Dissonance\Extensions\Infrastructure\Ping::class,
-//    \Dissonance\Extensions\Welcoming\WelcomesOnline::class,
+use Dissonance\Extensions;
 
-    \Dissonance\Extensions\Versioning\Gitlab::class,
+return [
+    Extensions\Infrastructure\Ping::class,
+//    Extensions\Welcoming\WelcomesOnline::class,
+
+    Extensions\Versioning\Gitlab::class,
 ];

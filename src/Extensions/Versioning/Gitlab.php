@@ -3,6 +3,7 @@
 namespace Dissonance\Extensions\Versioning;
 
 use Discord\Parts\Channel\Message;
+use Discord\Wrapper\LoggerWrapper;
 use Dissonance\Contracts\Extension;
 use Dissonance\Discord;
 use Dissonance\Traits\MutatesMessages;
@@ -16,9 +17,9 @@ class Gitlab implements Extension
 {
     use MutatesMessages;
 
-    protected $baseUrl = 'https://gitlab.example.com/api/v3';
+    protected $baseUrl = 'https://gitlab.com/api/v3/';
 
-    protected $regex = '/(?<project>[a-zA-Z0-9_-\/])?(?<issue>\#[0-9]+)/';
+    protected $regex = '/(?<project>[\S]+)?(?<issue>\#[0-9]+)/';
 
     /**
      * @var Client
@@ -30,9 +31,15 @@ class Gitlab implements Extension
      */
     protected $config;
 
-    public function __construct(Repository $config)
+    /**
+     * @var LoggerWrapper
+     */
+    protected $logger;
+
+    public function __construct(Repository $config, LoggerWrapper $logger)
     {
         $this->config = $config;
+        $this->logger = $logger;
 
         if ($config->get('gitlab.token')) {
             $this->guzzle = new Client([
@@ -50,7 +57,7 @@ class Gitlab implements Extension
      */
     public function type(Message $message, Discord $discord)
     {
-        if (! \Discord\mentioned($discord->client, $message)) {
+        if (! \Discord\mentioned($discord->client->user, $message)) {
             return;
         }
 
@@ -70,19 +77,28 @@ class Gitlab implements Extension
         $project = $this->project($slug);
 
         if (!$project) {
+            $this->logger->debug("Project $slug does not exist.");
             $message->reply('Get out :clown:, that project doesn\'t exist.');
             return;
         }
 
         if ($issue = Arr::get($m, 'issue')) {
-            $issue = $this->projectIssue($slug, $issue);
-            $message->reply(sprintf(
-                'Issue #%d (%s) - %s (assigned to %s)',
-                Arr::get($issue, 'id'),
-                Arr::get($issue, 'state'),
-                Arr::get($issue, 'title'),
-                Arr::get($issue, 'assignee.name')
-            ));
+            $issue = ltrim($issue, '#');
+            $issue = $this->projectIssue($project['id'], $issue);
+
+            if (!$issue) {
+                $message->reply('That issue does not exist.');
+            }
+
+            if ($issue) {
+                $message->reply(sprintf(
+                    'Issue #%d (%s) - %s (assigned to %s)',
+                    Arr::get($issue, 'id'),
+                    Arr::get($issue, 'state'),
+                    Arr::get($issue, 'title'),
+                    Arr::get($issue, 'assignee.name')
+                ));
+            }
             return;
         }
     }
@@ -111,9 +127,12 @@ class Gitlab implements Extension
 
     protected function get(string $path): ?Collection
     {
+        $path = ltrim($path, '/');
+
         try {
             $response = $this->guzzle->get($path);
         } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
             return null;
         }
 
@@ -129,8 +148,8 @@ class Gitlab implements Extension
         return $this->get('/projects/' . urlencode($slug));
     }
 
-    protected function projectIssue(string $slug, int $issue)
+    protected function projectIssue(int $project, int $issue)
     {
-        return $this->get('/projects/' . urlencode($slug) . '/issues/' . $issue);
+        return $this->get('/projects/' . $project . '/issues/' . $issue);
     }
 }

@@ -82,7 +82,8 @@ class Runner
             return [
                 $class => $extension
             ];
-        })->filter(function(Extension $extension) {
+        })->filter(function(Extension $extension) use ($discord) {
+            $discord->logger->info(get_class($extension) . ' was disabled.');
             return $extension->enabled();
         })->each(function(Extension $extension, $class) use ($discord) {
             if (count($extension->on())) {

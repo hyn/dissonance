@@ -97,7 +97,11 @@ class Gitlab implements Extension
         }
     }
 
-    protected function formatIssueReply($issue): string
+    /**
+     * @param array $issue
+     * @return string
+     */
+    protected function formatIssueReply(array $issue): string
     {
         $reply = sprintf(
             'Issue #%d (%s) - %s',
@@ -153,11 +157,20 @@ class Gitlab implements Extension
         return null;
     }
 
+    /**
+     * @param string $slug
+     * @return Collection|null
+     */
     protected function project(string $slug)
     {
         return $this->get('/projects/' . urlencode($slug));
     }
 
+    /**
+     * @param int $project
+     * @param int $issue
+     * @return Collection|null
+     */
     protected function projectIssue(int $project, int $issue)
     {
         return $this->get('/projects/' . $project . '/issues/' . $issue);

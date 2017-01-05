@@ -14,4 +14,16 @@ foreach ($basePaths as $basePath) {
 
 use Dissonance\Foundation\Application;
 
-return new Application($basePath);
+$app = new Application($basePath);
+
+$app->singleton(
+    Illuminate\Contracts\Console\Kernel::class,
+    Dissonance\Console\Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Debug\ExceptionHandler::class,
+    Illuminate\Foundation\Exceptions\Handler::class
+);
+
+return $app;

@@ -1,16 +1,20 @@
 <?php
 
-namespace Dissonance;
+namespace Dissonance\Commands;
 
 use Discord\Parts\User\Client;
 use Discord\Wrapper\LoggerWrapper;
 use Dissonance\Contracts\Extension;
+use Dissonance\Discord;
 use Dissonance\Foundation\Application;
 use Illuminate\Config\Repository;
-use Illuminate\Support\Collection;
+use Illuminate\Console\Command;
 
-class Runner
+class Runner extends Command
 {
+    protected $signature = 'run';
+    protected $description = 'Runs the bot';
+
     /**
      * @var Application
      */
@@ -31,25 +35,26 @@ class Runner
      */
     protected $extensions;
 
-    public function __construct(Application $app, Repository $config, Discord $discord)
+    public function __construct(Application $app, Discord $discord, Repository $config)
     {
+        parent::__construct();
+
         $this->app = $app;
         $this->config = $config;
         $this->discord = $discord;
     }
 
-    /**
-     * Runs the Discord bot as daemon.
-     */
-    public function run()
+    public function handle()
     {
         $this->discord->on('ready', function (Discord $discord) {
             $this->bindings($discord);
             $this->loadExtensions($discord);
+            $discord->logger->debug('Bindings and extensions loaded, awaiting activity..');
         });
 
         $this->discord->run();
     }
+
 
     /**
      * @param Discord $discord
@@ -59,13 +64,17 @@ class Runner
         // Binds the identity the discord client uses into the container.
         $this->app->singleton(
             Client::class,
-            function() use ($discord) { return $discord->client; }
+            function () use ($discord) {
+                return $discord->client;
+            }
         );
 
         // Binds the logger instance the discord client uses into the container.
         $this->app->singleton(
             LoggerWrapper::class,
-            function() use ($discord) { return $discord->logger; }
+            function () use ($discord) {
+                return $discord->logger;
+            }
         );
 
     }
@@ -75,27 +84,29 @@ class Runner
      */
     public function loadExtensions(Discord $discord)
     {
-        $this->extensions = collect($this->config->get('extensions', []))->mapWithKeys(function($class) use ($discord) {
+        $this->extensions = collect($this->config->get('extensions', []))->mapWithKeys(function ($class) use ($discord) {
             /** @var Extension $extension */
             $extension = $this->app->make($class);
 
             return [
                 $class => $extension
             ];
-        })->filter(function(Extension $extension) use ($discord) {
-            $discord->logger->info(get_class($extension) . ' was disabled.');
+        })->filter(function (Extension $extension) use ($discord) {
+            if (!$extension->enabled()) {
+                $discord->logger->info(get_class($extension) . ' was disabled.');
+            }
             return $extension->enabled();
-        })->each(function(Extension $extension, $class) use ($discord) {
+        })->each(function (Extension $extension, $class) use ($discord) {
             if (count($extension->on())) {
                 foreach ($extension->on() as $event => $callable) {
                     if (!is_callable($callable)) {
                         throw new \RuntimeException('Not callable');
                     }
 
-                    $discord->logger->debug("Class $class registered on event $event");
-
                     $discord->on($event, $callable);
                 }
+
+                $discord->logger->debug("Class $class registered to listen to events", $extension->on());
             }
         });
     }

@@ -6,5 +6,5 @@ return [
     Extensions\Infrastructure\Ping::class,
 //    Extensions\Welcoming\WelcomesOnline::class,
 
-    Extensions\Versioning\Gitlab::class,
+//    Extensions\Versioning\Gitlab::class,
 ];

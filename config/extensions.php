@@ -4,7 +4,7 @@ use Dissonance\Extensions;
 
 return [
     Extensions\Infrastructure\Ping::class,
-//    Extensions\Welcoming\WelcomesOnline::class,
+    Extensions\Friendly\Thankful::class,
 
 //    Extensions\Versioning\Gitlab::class,
 ];

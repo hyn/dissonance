@@ -2,8 +2,8 @@
 
 namespace Dissonance\Commands;
 
-use Discord\Parts\User\Client;
 use Discord\Wrapper\LoggerWrapper;
+use Dissonance\Bot;
 use Dissonance\Contracts\Extension;
 use Dissonance\Discord;
 use Dissonance\Foundation\Application;
@@ -63,9 +63,9 @@ class Runner extends Command
     {
         // Binds the identity the discord client uses into the container.
         $this->app->singleton(
-            Client::class,
+            Bot::class,
             function () use ($discord) {
-                return $discord->client;
+                return new Bot($discord->client);
             }
         );
 

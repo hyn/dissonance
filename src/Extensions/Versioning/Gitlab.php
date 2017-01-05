@@ -6,7 +6,7 @@ use Discord\Parts\Channel\Message;
 use Discord\Wrapper\LoggerWrapper;
 use Dissonance\Contracts\Extension;
 use Dissonance\Discord;
-use Dissonance\Traits\MutatesMessages;
+use Dissonance\Traits\WorksWithMessages;
 use GuzzleHttp\Client;
 use Illuminate\Config\Repository;
 use Illuminate\Support\Arr;
@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class Gitlab implements Extension
 {
-    use MutatesMessages;
+    use WorksWithMessages;
 
     protected $baseUrl = 'https://gitlab.com/api/v3/';
 

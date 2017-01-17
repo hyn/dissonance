@@ -2,37 +2,10 @@
 
 namespace Dissonance\Extensions\Infrastructure;
 
-use Discord\Parts\Channel\Message;
-use Dissonance\Bot;
-use Dissonance\Contracts\Extension;
-use Dissonance\Discord;
-use Dissonance\Traits\WorksWithMessages;
+use Dissonance\Abstracts\AbstractExtension;
 
-class Ping implements Extension
+class Ping extends AbstractExtension
 {
-    use WorksWithMessages;
-
-    /**
-     * @var Bot
-     */
-    protected $bot;
-
-    public function __construct(Bot $bot)
-    {
-        $this->bot = $bot;
-    }
-
-    /**
-     * @param Message $message
-     * @param Discord $discord
-     */
-    public function pong(Message $message, Discord $discord)
-    {
-        if ($this->bot->isMentioned($message) && $this->messageIs($message, 'ping')) {
-            $message->reply("pong, duration: {$message->timestamp->diffForHumans(null, true)}");
-        }
-    }
-
     /**
      * Indicates whether the extension is enabled.
      *
@@ -44,14 +17,12 @@ class Ping implements Extension
     }
 
     /**
-     * Associative array with the event as key and the callable as value.
-     *
-     * @return array
+     * @return void
      */
-    public function on(): array
+    protected function reply()
     {
-        return [
-            'message' => [$this, 'pong']
-        ];
+        if ($this->isMentioned && $this->message->is('ping')) {
+            $this->response("pong, duration: {$this->message->timestamp->diffForHumans(null, true)}");
+        }
     }
 }

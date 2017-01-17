@@ -6,7 +6,7 @@ use Discord\Wrapper\LoggerWrapper;
 use Dissonance\Bot;
 use Dissonance\Contracts\Extension;
 use Dissonance\Discord;
-use Dissonance\Foundation\Application;
+use Illuminate\Container\Container as Application;
 use Illuminate\Config\Repository;
 use Illuminate\Console\Command;
 

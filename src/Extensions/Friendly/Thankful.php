@@ -2,28 +2,10 @@
 
 namespace Dissonance\Extensions\Friendly;
 
-use Discord\Parts\Channel\Message;
-use Dissonance\Bot;
-use Dissonance\Contracts\Extension;
-use Dissonance\Discord;
-use Dissonance\Traits\WorksWithMessages;
+use Dissonance\Abstracts\AbstractExtension;
 
-class Thankful implements Extension
+class Thankful extends AbstractExtension
 {
-    use WorksWithMessages;
-    /**
-     * @var Bot
-     */
-    protected $bot;
-
-    /**
-     * Thankful constructor.
-     * @param Bot $bot
-     */
-    public function __construct(Bot $bot)
-    {
-        $this->bot = $bot;
-    }
 
     /**
      * Indicates whether the extension is enabled.
@@ -36,25 +18,12 @@ class Thankful implements Extension
     }
 
     /**
-     * @param Message $message
-     * @param Discord $discord
+     * @return void
      */
-    public function youAreWelcome(Message $message, Discord $discord)
+    protected function reply()
     {
-        if ($this->bot->isMentioned($message) && $this->messageMatches($message, '/^(thanks|thank you)$/')) {
-            $message->reply('You are welcome.');
+        if ($this->isMentioned && $this->message->matches('/^(thanks|thank you)$/')) {
+            $this->message->reply('You are welcome.');
         }
-    }
-
-    /**
-     * Associative array with the event as key and the callable as value.
-     *
-     * @return array
-     */
-    public function on(): array
-    {
-        return [
-            'message' => [$this, 'youAreWelcome']
-        ];
     }
 }

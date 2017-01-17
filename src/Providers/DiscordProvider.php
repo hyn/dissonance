@@ -5,7 +5,7 @@ namespace Dissonance\Providers;
 use Dissonance\Discord;
 use Illuminate\Contracts\Logging\Log;
 use Illuminate\Support\ServiceProvider;
-use Monolog\Handler\StreamHandler;
+use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 
 class DiscordProvider extends ServiceProvider
@@ -18,7 +18,7 @@ class DiscordProvider extends ServiceProvider
                 /** @var Logger $monolog */
                 $monolog = $app->make(Log::class)->getMonolog();
                 // Adds stdout as another log handler
-                $monolog->pushHandler(new StreamHandler('php://stdout'));
+                $monolog->pushHandler(new ErrorLogHandler());
 
                 return new Discord([
                     'token' => $app['config']->get('discord.token'),

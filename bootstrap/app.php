@@ -3,6 +3,7 @@
 $basePaths = [
     __DIR__ . '/../',
     __DIR__ . '/../../../../',
+    __DIR__ . '/../../../'
 ];
 
 foreach ($basePaths as $basePath) {

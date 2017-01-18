@@ -59,7 +59,7 @@ abstract class AbstractExtension implements Contract
      * @param bool $sequentially
      * @return Promise
      */
-    protected function channelResponse($response, bool $sequentially = true)
+    protected function channelResponse($response, bool $sequentially = false)
     {
         if ($response instanceof Collection) {
             $response = $response->toArray();
@@ -73,12 +73,12 @@ abstract class AbstractExtension implements Contract
         $promise = null;
 
         foreach ($response as $resp) {
-            if ($sequentially && $promise) {
+            if ($sequentially || !$promise) {
+                $promise = $this->message->channel->sendMessage($resp);
+            } else {
                 $promise->then(function () use ($resp, &$promise) {
                     $promise = $this->message->channel->sendMessage($resp);
                 });
-            } else {
-                $promise = $this->message->channel->sendMessage($resp);
             }
         }
     }

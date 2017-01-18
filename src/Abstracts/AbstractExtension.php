@@ -4,10 +4,12 @@ namespace Dissonance\Abstracts;
 
 use Discord\Discord;
 use Discord\Parts\Channel\Message as DiscordMessage;
-use Dissonance\Message;
 use Dissonance\Bot;
 use Dissonance\Contracts\Extension as Contract;
+use Dissonance\Message;
 use Dissonance\Traits\WorksWithMessages;
+use Illuminate\Support\Collection;
+use React\Promise\Promise;
 
 abstract class AbstractExtension implements Contract
 {
@@ -52,9 +54,33 @@ abstract class AbstractExtension implements Contract
         return $this->reply();
     }
 
-    protected function channelResponse(string $response)
+    /**
+     * @param string|array|Collection $response
+     * @param bool $sequentially
+     * @return Promise
+     */
+    protected function channelResponse($response, bool $sequentially = true)
     {
-        return $this->message->channel->sendMessage($response);
+        if ($response instanceof Collection) {
+            $response = $response->toArray();
+        }
+
+        if (is_string($response)) {
+            return $this->message->channel->sendMessage($response);
+        }
+
+        /** @var Promise|null $promise */
+        $promise = null;
+
+        foreach ($response as $resp) {
+            if ($sequentially && $promise) {
+                $promise->then(function () use ($resp, &$promise) {
+                    $promise = $this->message->channel->sendMessage($resp);
+                });
+            } else {
+                $promise = $this->message->channel->sendMessage($resp);
+            }
+        }
     }
 
     protected function response(string $response)

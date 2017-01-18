@@ -2,10 +2,8 @@
 
 namespace Dissonance\Extensions\Versioning;
 
-use Discord\Parts\Channel\Message;
 use Discord\Wrapper\LoggerWrapper;
-use Dissonance\Contracts\Extension;
-use Dissonance\Discord;
+use Dissonance\Abstracts\AbstractExtension;
 use Dissonance\Traits\WorksWithMessages;
 use GuzzleHttp\Client;
 use Illuminate\Config\Repository;
@@ -13,7 +11,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-class Gitlab implements Extension
+class Gitlab extends AbstractExtension
 {
     use WorksWithMessages;
 
@@ -51,19 +49,15 @@ class Gitlab implements Extension
         }
     }
 
-    /**
-     * @param Message $message
-     * @param Discord $discord
-     */
-    public function type(Message $message, Discord $discord)
+    public function reply()
     {
-        if (! \Discord\mentioned($discord->client->user, $message)) {
+        if (!$this->isMentioned) {
             return;
         }
 
-        $slug = $message->channel->name;
+        $slug = $this->message->channel->name;
 
-        if (!preg_match($this->regex, $this->cleanMessageContent($message), $m)) {
+        if (!preg_match($this->regex, $this->message->getCleaned(), $m)) {
             return;
         }
         if (Arr::get($m, 'project')) {
@@ -78,7 +72,7 @@ class Gitlab implements Extension
 
         if (!$project) {
             $this->logger->debug("Project $slug does not exist.");
-            $message->reply('Get out :clown:, that project doesn\'t exist.');
+            $this->response('Get out :clown:, that project doesn\'t exist.');
             return;
         }
 
@@ -87,11 +81,11 @@ class Gitlab implements Extension
             $issue = $this->projectIssue($project['id'], $issue);
 
             if (!$issue) {
-                $message->reply('That issue does not exist.');
+                $this->response('That issue does not exist.');
             }
 
             if ($issue) {
-                $message->reply($this->formatIssueReply($issue));
+                $this->response($this->formatIssueReply($issue));
             }
             return;
         }
@@ -128,17 +122,9 @@ class Gitlab implements Extension
     }
 
     /**
-     * Associative array with the event as key and the callable as value.
-     *
-     * @return array
+     * @param string $path
+     * @return Collection|null
      */
-    public function on(): array
-    {
-        return [
-            'message' => [$this, 'type']
-        ];
-    }
-
     protected function get(string $path): ?Collection
     {
         $path = ltrim($path, '/');

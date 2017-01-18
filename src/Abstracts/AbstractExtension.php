@@ -7,14 +7,11 @@ use Discord\Parts\Channel\Message as DiscordMessage;
 use Dissonance\Bot;
 use Dissonance\Contracts\Extension as Contract;
 use Dissonance\Message;
-use Dissonance\Traits\WorksWithMessages;
 use Illuminate\Support\Collection;
 use React\Promise\Promise;
 
 abstract class AbstractExtension implements Contract
 {
-    use WorksWithMessages;
-
     /**
      * @var bool
      */
@@ -59,7 +56,7 @@ abstract class AbstractExtension implements Contract
      * @param bool $sequentially
      * @return Promise
      */
-    protected function channelResponse($response, bool $sequentially = false)
+    protected function channelResponse($response, bool $sequentially = false): Promise
     {
         if ($response instanceof Collection) {
             $response = $response->toArray();
@@ -81,9 +78,11 @@ abstract class AbstractExtension implements Contract
                 });
             }
         }
+
+        return $promise;
     }
 
-    protected function response(string $response)
+    protected function response(string $response): Promise
     {
         return $this->message->reply($response);
     }

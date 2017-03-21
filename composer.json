@@ -3,9 +3,7 @@
     "description": "",
     "license": "mit",
     "require": {
-        "php": ">=7.1.0",
-        "team-reflex/discord-php": "^4.0",
-        "laravel/framework": "5.3.*"
+        "php": ">=7.1.0"
     },
     "autoload": {
         "psr-4": {

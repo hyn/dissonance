@@ -6,8 +6,6 @@ use Illuminate\Foundation\Application as Foundation;
 
 class Application extends Foundation
 {
-
-
     /**
      * Get the path to the bootstrap directory.
      *
@@ -23,5 +21,25 @@ class Application extends Foundation
                 return $bootstrapPath;
             }
         }
+    }
+
+    /**
+     * Get the path to the public / web directory.
+     *
+     * @return string
+     */
+    public function publicPath()
+    {
+        return null;
+    }
+
+    /**
+     * Get the path to the vendor directory.
+     *
+     * @return string
+     */
+    public function vendorPath()
+    {
+        return base_path('vendor/');
     }
 }

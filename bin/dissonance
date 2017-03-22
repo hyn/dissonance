@@ -3,3 +3,22 @@
 
 namespace Dissonance;
 
+use Dissonance\Foundation\Application;
+use Illuminate\Contracts\Console\Kernel;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
+/** @var Application $app */
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+/** @var Kernel $kernel */
+$kernel = $app->make(Kernel::class);
+
+$status = $kernel->handle(
+    $input = new ArgvInput,
+    new ConsoleOutput
+);
+
+$kernel->terminate($input, $status);
+
+exit($status);

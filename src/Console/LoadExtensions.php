@@ -2,6 +2,7 @@
 
 namespace Dissonance\Console;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
 
@@ -28,10 +29,15 @@ class LoadExtensions
     }
 
     /**
-     * @return string
+     * @return array
      */
-    protected function getInstalled()
+    protected function getInstalled(): array
     {
-        return (new Filesystem())->get($this->app->vendorPath() . 'composer/installed.json');
+        try {
+            $json = (new Filesystem())->get($this->app->vendorPath() . 'composer/installed.json');
+            return json_decode($json, true);
+        } catch (FileNotFoundException $e) {
+            return [];
+        }
     }
 }

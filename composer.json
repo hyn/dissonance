@@ -1,12 +1,13 @@
 {
     "name": "hyn/dissonance",
-    "description": "The discord bot framework",
+    "description": "The discord bot framework for PHP",
     "license": "mit",
     "require": {
         "php": ">=7.1.0",
         "guzzlehttp/promises": "^1.3",
         "guzzlehttp/guzzle": "^6.2",
-        "laravel/framework": "5.4.*"
+        "illuminate/support": "5.*",
+        "team-reflex/discord-php": "^4.0"
     },
     "autoload": {
         "psr-4": {
@@ -15,8 +16,5 @@
     },
     "bin": [
         "bin/dissonance"
-    ],
-    "require-dev": {
-        "symfony/var-dumper": "^3.2"
-    }
+    ]
 }
